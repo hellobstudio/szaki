@@ -3,14 +3,23 @@ package com.szaki.app
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.runtime.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.NavType
-import androidx.navigation.compose.*
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.szaki.app.data.AppDatabase
 import com.szaki.app.data.JobEntity
 import com.szaki.app.data.VisitEntity
-import com.szaki.app.ui.*
+import com.szaki.app.ui.AddJobScreen
+import com.szaki.app.ui.AddVisitScreen
+import com.szaki.app.ui.CalendarScreen
+import com.szaki.app.ui.JobDetailScreen
+import com.szaki.app.ui.JobListScreen
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -19,16 +28,13 @@ import java.util.Locale
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         val db = AppDatabase.getDatabase(this)
         val dao = db.dao()
-
         setContent {
             MaterialTheme {
                 val navController = rememberNavController()
                 val coroutineScope = rememberCoroutineScope()
                 val jobs by dao.getAllJobs().collectAsState(initial = emptyList())
-
                 NavHost(navController = navController, startDestination = "job_list") {
                     composable("job_list") {
                         JobListScreen(
@@ -38,7 +44,6 @@ class MainActivity : ComponentActivity() {
                             onCalendarClick = { navController.navigate("calendar") }
                         )
                     }
-
                     composable("add_job") {
                         AddJobScreen(
                             onBack = { navController.popBackStack() },
@@ -58,7 +63,6 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     }
-
                     composable(
                         "job_detail/{jobId}",
                         arguments = listOf(navArgument("jobId") { type = NavType.LongType })
@@ -66,7 +70,6 @@ class MainActivity : ComponentActivity() {
                         val jobId = backStackEntry.arguments?.getLong("jobId") ?: 0L
                         val selectedJob = jobs.find { it.id == jobId }
                         val visits by dao.getVisitsForJob(jobId).collectAsState(initial = emptyList())
-
                         JobDetailScreen(
                             job = selectedJob,
                             visits = visits,
@@ -74,7 +77,6 @@ class MainActivity : ComponentActivity() {
                             onAddVisitClick = { navController.navigate("add_visit/$jobId") }
                         )
                     }
-
                     composable(
                         "add_visit/{jobId}",
                         arguments = listOf(navArgument("jobId") { type = NavType.LongType })
@@ -107,12 +109,8 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     }
-
                     composable("calendar") {
-                        CalendarScreen(
-                            jobs = jobs,
-                            onBack = { navController.popBackStack() }
-                        )
+                        CalendarScreen(jobs = jobs, onBack = { navController.popBackStack() })
                     }
                 }
             }
