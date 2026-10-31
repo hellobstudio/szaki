@@ -24,13 +24,8 @@ jobs:
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
 
-    - name: Ensure Gradle Wrapper
-      run: |
-        if [ ! -f "gradle/wrapper/gradle-wrapper.jar" ]; then
-          echo "Generating Gradle Wrapper JAR..."
-          gradle wrapper --gradle-version 8.4
-        fi
-        chmod +x gradlew || true
+    - name: Make gradlew executable
+      run: chmod +x gradlew || true
 
     - name: Build Debug APK
       run: ./gradlew assembleDebug --stacktrace
